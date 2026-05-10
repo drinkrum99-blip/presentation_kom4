@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Инструментарий | Презентация</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --bg-card: #1e293b;
+            --accent: #3b82f6;
+            --accent-glow: #38bdf8;
+            --success: #10b981;
+            --purple: #a78bfa;
+            --text-main: #e2e8f0;
+            --text-muted: #94a3b8;
+            --border-light: #334155;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: radial-gradient(ellipse at top, #1e293b 0%, #0f172a 70%);
+            color: var(--text-main);
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .slide-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        .slide {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            padding: 40px 60px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            opacity: 0;
+            transform: translateX(50px) scale(0.98);
+            pointer-events: none;
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 1;
+            overflow-y: auto;
+        }
+
+        .slide.active {
+            opacity: 1;
+            transform: translateX(0) scale(1);
+            pointer-events: auto;
+            z-index: 10;
+        }
+
+        .slide.prev { transform: translateX(-50px) scale(0.98); opacity: 0; }
+        .slide.next { transform: translateX(50px) scale(0.98); opacity: 0; }
+
+        .center-content { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; max-height: 88vh; gap: 20px; }
+        .visual-wrapper { max-width: 100%; max-height: 52vh; overflow: hidden; border-radius: 14px; border: 1px solid rgba(51, 65, 85, 0.5); box-shadow: 0 12px 40px rgba(0,0,0,0.4); }
+        .visual-wrapper img { width: auto; height: 100%; max-height: 52vh; display: block; object-fit: contain; }
+
+        /* Typography */
+        h1, h2, h3 {
+            color: var(--accent-glow);
+            line-height: 1.15;
+            letter-spacing: -0.02em;
+        }
+
+        h1 {
+            font-size: clamp(2.5rem, 5vw, 3.8rem);
+            font-weight: 900;
+            text-transform: uppercase;
+            text-shadow: 0 0 20px rgba(56, 189, 248, 0.3);
+            margin-bottom: 12px;
+        }
+
+        h2 {
+            font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+            font-weight: 800;
+            border-left: 5px solid var(--accent);
+            padding-left: 18px;
+            margin-bottom: 20px;
+        }
+
+        h3 {
+            color: var(--text-main);
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: clamp(1rem, 2vw, 1.4rem);
+            font-weight: 400;
+            margin-top: 5px;
+        }
+
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(59, 130, 246, 0.4);
+            color: var(--accent-glow);
+            padding: 8px 16px;
+            border-radius: 24px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            backdrop-filter: blur(4px);
+        }
+
+        .accent-line {
+            height: 3px;
+            width: 70px;
+            background: linear-gradient(90deg, var(--accent), var(--accent-glow));
+            border-radius: 2px;
+            margin: 16px 0;
+        }
+
+        .mono {
+            font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+            color: var(--accent-glow);
+            font-weight: 700;
+            background: rgba(59, 130, 246, 0.1);
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        /* Cards */
+        .card {
+            background: linear-gradient(160deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.9) 100%);
+            border: 1px solid rgba(51, 65, 85, 0.6);
+            border-radius: 14px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(8px);
+            transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(59, 130, 246, 0.12);
+            border-color: rgba(59, 130, 246, 0.5);
+        }
+
+        /* Lists */
+        ul { list-style: none; padding-left: 0; }
+
+        ul li {
+            margin-bottom: 8px;
+            padding-left: 22px;
+            position: relative;
+            color: var(--text-main);
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+
+        ul li::before {
+            content: "▹";
+            color: var(--accent-glow);
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        /* Layouts */
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-top: 16px;
+            width: 100%;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 18px;
+            margin-top: 16px;
+            width: 100%;
+        }
+
+        .grid-2-col {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-top: 14px;
+        }
+
+        .timeline-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 10px;
+            padding: 12px 16px;
+            background: rgba(30, 41, 59, 0.6);
+            border-left: 3px solid var(--accent);
+            border-radius: 8px;
+            transition: background 0.2s;
+        }
+
+        .timeline-item:hover {
+            background: rgba(30, 41, 59, 0.9);
+        }
+
+        .timeline-time {
+            font-family: 'JetBrains Mono', 'Consolas', monospace;
+            color: var(--accent-glow);
+            font-size: 1rem;
+            font-weight: 700;
+            min-width: 85px;
+        }
+
+        .stat-box {
+            background: rgba(59, 130, 246, 0.08);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+            margin-top: 14px;
+            backdrop-filter: blur(4px);
+        }
+
+        .stat-num {
+            font-size: clamp(2rem, 4vw, 2.8rem);
+            color: var(--accent-glow);
+            font-weight: 900;
+            display: block;
+            text-shadow: 0 0 15px rgba(56, 189, 248, 0.3);
+        }
+
+        .info-block {
+            background: rgba(30, 41, 59, 0.5);
+            border-left: 3px solid var(--accent);
+            padding: 14px 18px;
+            border-radius: 8px;
+            margin-top: 12px;
+        }
+
+        .highlight {
+            color: var(--accent-glow);
+            font-weight: 600;
+        }
+
+        .feature-list {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 10px;
+            background: rgba(59, 130, 246, 0.05);
+            border-radius: 8px;
+        }
+
+        .feature-icon {
+            font-size: 1.3rem;
+            flex-shrink: 0;
+        }
+
+        .feature-text {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        /* Slide 1 Specific */
+        .title-slide {
+            align-items: center;
+            text-align: center;
+        }
+
+        .title-slide .accent-line {
+            margin: 16px auto;
+        }
+
+        .title-slide .tags {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 16px;
+        }
+
+        .hero-image {
+            max-width: 500px;
+            width: 100%;
+            margin-top: 20px;
+            border-radius: 16px;
+            box-shadow: 0 0 40px rgba(56, 189, 248, 0.15), 0 20px 60px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+
+        .nav-hint {
+            margin-top: 16px;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            opacity: 0.6;
+        }
+
+        /* Visual examples */
+        .visual-example {
+            width: 100%;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid rgba(51, 65, 85, 0.5);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .visual-example:hover {
+            transform: scale(1.02);
+            box-shadow: 0 12px 40px rgba(59, 130, 246, 0.15);
+        }
+
+        .visual-example img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .visual-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-align: center;
+            padding: 8px;
+            font-style: italic;
+        }
+
+        /* Controls */
+        .controls {
+            position: fixed;
+            bottom: 28px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            z-index: 100;
+            background: rgba(15, 23, 42, 0.9);
+            padding: 10px 24px;
+            border-radius: 32px;
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(51, 65, 85, 0.5);
+        }
+
+        .ctrl-btn {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(59, 130, 246, 0.4);
+            color: var(--accent-glow);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.25s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .ctrl-btn:hover {
+            background: var(--accent);
+            color: white;
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+        }
+
+        .slide-counter {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-weight: 600;
+            min-width: 55px;
+            text-align: center;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .progress-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent), var(--accent-glow), var(--purple));
+            width: 0%;
+            transition: width 0.5s ease;
+            z-index: 101;
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
+        }
+
+        /* Animations */
+        .animate-in {
+            opacity: 0;
+            transform: translateY(25px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        .slide.active .animate-in {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .slide.active .delay-1 { transition-delay: 0.1s; }
+        .slide.active .delay-2 { transition-delay: 0.2s; }
+        .slide.active .delay-3 { transition-delay: 0.3s; }
+        .slide.active .delay-4 { transition-delay: 0.4s; }
+        .slide.active .delay-5 { transition-delay: 0.5s; }
+        .slide.active .delay-6 { transition-delay: 0.6s; }
+        .slide.active .delay-7 { transition-delay: 0.7s; }
+
+        .animate-left {
+            opacity: 0;
+            transform: translateX(-30px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        .slide.active .animate-left {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .animate-right {
+            opacity: 0;
+            transform: translateX(30px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        .slide.active .animate-right {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .animate-scale {
+            opacity: 0;
+            transform: scale(0.9);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        .slide.active .animate-scale {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .slide { padding: 30px 25px; }
+            .grid-3, .grid-2 { grid-template-columns: 1fr; }
+            .grid-2-col { grid-template-columns: 1fr; }
+            .hero-image { max-width: 90%; }
+            .timeline-item { flex-direction: column; align-items: flex-start; }
+            .timeline-time { margin-bottom: 4px; }
+            .feature-list { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 600px) {
+            h1 { font-size: 2rem; }
+            h2 { font-size: 1.5rem; }
+            .slide { padding: 25px 18px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="slide-container">
+        <!-- Слайд 1: Титульный -->
+        <div class="slide active title-slide">
+            <h1 class="animate-in delay-1">AI-Инструментарий</h1>
+            <p class="subtitle animate-in delay-2">Практический воркшоп по нейросетям</p>
+            <div class="accent-line animate-in delay-3"></div>
+            <div class="tags animate-in delay-4">
+                <span class="tag">📍 Корочанский техникум</span>
+                <span class="tag">📅 12 мая 2026</span>
+                <span class="tag">⏰ 10:00–17:30</span>
+            </div>
+            <img src="https://image.qwenlm.ai/public_source/19252025-1d7c-4450-9638-b85e26051cdd/1f97df97b-b88b-4e3d-be32-4e36281ba5bf.png" alt="AI-Инструментарий Poster" class="hero-image animate-scale delay-5">
+            <div class="info-block animate-in delay-6" style="margin-top: 18px; max-width: 700px; text-align: left;">
+                <p style="font-size: 0.95rem; line-height: 1.6; color: var(--text-muted);">
+                    <span class="highlight">Интенсивный практический курс</span> для студентов и преподавателей. 
+                    Освойте нейросети для создания контента, автоматизации задач и повышения эффективности 
+                    в учёбе и будущей карьере.
+                </p>
+            </div>
+            <p class="nav-hint animate-in delay-7">← → или пробел для навигации</p>
+        </div>
+
+        <!-- Слайд 2: Проблема -->
+        <div class="slide">
+            <h2 class="animate-left delay-1">🔍 Вызовы современного образования</h2>
+            <div class="grid-2-col">
+                <div class="animate-left delay-2">
+                    <div class="card" style="margin-bottom: 14px;">
+                        <h3 style="color: var(--accent-glow); margin-bottom: 8px;">📊 Текущая ситуация</h3>
+                        <ul>
+                            <li>Студенты используют ИИ стихийно — без понимания этики и эффективности</li>
+                            <li>Преподавателям не хватает методик интеграции ИИ в учебный процесс</li>
+                            <li>Работодатели ждут выпускников с цифровыми компетенциями 2026+</li>
+                            <li>Отсутствие системного подхода к изучению AI-инструментов</li>
+                        </ul>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-num">87%</span>
+                        <span style="color: var(--text-muted); font-size: 0.95rem;">студентов хотят учиться работать с нейросетями*</span>
+                        <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">(*внутренний опрос техникума, 2026)</div>
+                    </div>
+                </div>
+                <div class="animate-left delay-3">
+                    <div class="card" style="border-color: var(--success); height: 100%;">
+                        <h3 style="color: var(--success); margin-bottom: 12px;">💡 Наше решение</h3>
+                        <ul>
+                            <li>Структурированный практический воркшоп с фокусом на реальные задачи</li>
+                            <li>70% практики, 30% теории — максимум применимых навыков</li>
+                            <li>Работа с актуальными инструментами: ChatGPT, Midjourney, Claude</li>
+                            <li>Готовые промпты и шаблоны для учёбы и работы</li>
+                            <li>Сертификат о прохождении курса</li>
+                        </ul>
+                        <div class="info-block" style="margin-top: 14px;">
+                            <p style="font-size: 0.9rem; color: var(--text-muted);">
+                                <span class="highlight">Результат:</span> участники освоят 
+                                <span class="mono">10+ AI-инструментов</span> и создадут 
+                                <span class="mono">5+ проектов</span> для портфолио
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Слайд 3: Концепция -->
+        <div class="slide">
+            <h2 class="animate-left delay-1">🎯 Концепция мероприятия</h2>
+            <div class="grid-3">
+                <div class="card animate-in delay-2">
+                    <h3 style="color: var(--accent-glow); margin-bottom: 12px;">✅ Что</h3>
+                    <p style="font-size: 0.95rem; line-height: 1.5; color: var(--text-muted); margin-bottom: 10px;">
+                        Практический воркшоп «AI-Инструментарий» — от промптов до реальных кейсов
+                    </p>
+                    <div class="feature-list" style="grid-template-columns: 1fr;">
+                        <div class="feature-item">
+                            <span class="feature-icon">🎓</span>
+                            <span class="feature-text">Обучение работе с ChatGPT, Midjourney, Claude</span>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon">🛠</span>
+                            <span class="feature-text">Практические задания и групповые проекты</span>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon">📚</span>
+                            <span class="feature-text">Методические материалы и гайды</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card animate-in delay-3">
+                    <h3 style="color: var(--accent-glow); margin-bottom: 12px;">✅ Для кого</h3>
+                    <ul style="font-size: 0.95rem;">
+                        <li><span class="highlight">Студенты 1–3 курсов</span> технических и гуманитарных специальностей</li>
+                        <li><span class="highlight">Преподаватели</span>, желающие внедрить ИИ в учебный процесс</li>
+                        <li><span class="highlight">Начинающие специалисты</span>, желающие освоить AI-инструменты</li>
+                        <li>Ожидаемый охват: <span class="mono">50–70</span> участников</li>
+                    </ul>
+                </div>
+                <div class="card animate-in delay-4">
+                    <h3 style="color: var(--accent-glow); margin-bottom: 12px;">✅ Формат</h3>
+                    <ul style="font-size: 0.95rem;">
+                        <li><span class="mono">📍 Офлайн</span>, аудитория техникума</li>
+                        <li><span class="mono">⏰ 5.5 часов</span>, 6 модулей</li>
+                        <li><span class="mono">🛠 70% практики</span>, 30% теории</li>
+                        <li>🎁 Сертификаты + цифровые материалы</li>
+                        <li>☕ Кофе-брейки и нетворкинг</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="info-block animate-in delay-5" style="margin-top: 16px;">
+                <p style="font-size: 0.95rem; line-height: 1.5;">
+                    <span class="highlight">Уникальность:</span> каждый участник уйдёт с готовыми проектами — 
+                    сгенерированными изображениями, написанными текстами, созданными презентациями и 
+                    автоматизированными процессами.
+                </p>
+            </div>
+        </div>
+
+        <!-- Слайд 4: Программа -->
+        <div class="slide">
+            <h2 class="animate-left delay-1"> Программа дня</h2>
+            <div class="grid-2-col">
+                <div class="animate-left delay-2">
+                    <div class="timeline-item"><span class="timeline-time">10:00</span> Регистрация, приветственный кофе</div>
+                    <div class="timeline-item"><span class="timeline-time">10:30</span> <strong>Блок 1:</strong> ИИ-ландшафт 2026. Обзор инструментов</div>
+                    <div class="timeline-item"><span class="timeline-time">11:30</span> <strong>Блок 2:</strong> Промпт-инжиниринг. Практика с ChatGPT</div>
+                    <div class="timeline-item"><span class="timeline-time">12:30</span> Кофе-брейк + нетворкинг</div>
+                </div>
+                <div class="animate-left delay-3">
+                    <div class="timeline-item"><span class="timeline-time">13:00</span> <strong>Блок 3:</strong> Генерация изображений (Midjourney/DALL-E)</div>
+                    <div class="timeline-item"><span class="timeline-time">14:00</span> <strong>Блок 4:</strong> Создание презентаций и сайтов с ИИ</div>
+                    <div class="timeline-item"><span class="timeline-time">15:00</span> <strong>Блок 5:</strong> Групповая работа над кейсами</div>
+                    <div class="timeline-item"><span class="timeline-time">16:30</span> <strong>Блок 6:</strong> Итоги, сертификаты, фото</div>
+                </div>
+            </div>
+            
+            <div class="card animate-in delay-4" style="margin-top: 16px;">
+                <h3 style="color: var(--accent-glow); margin-bottom: 12px;">📚 Что изучим:</h3>
+                <div class="feature-list">
+                    <div class="feature-item">
+                        <span class="feature-icon">💬</span>
+                        <div>
+                            <strong style="color: var(--text-main); display: block; margin-bottom: 4px;">Промпт-инжиниринг</strong>
+                            <span class="feature-text">Написание эффективных запросов для ChatGPT, Qwen, ГигаЧат, DeepSeek</span>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">🎨</span>
+                        <div>
+                            <strong style="color: var(--text-main); display: block; margin-bottom: 4px;">Генерация изображений</strong>
+                            <span class="feature-text">Midjourney, Кандинский — от идеи до результата</span>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon"></span>
+                        <div>
+                            <strong style="color: var(--text-main); display: block; margin-bottom: 4px;">Создание сайтов</strong>
+                            <span class="feature-text">AI-конструкторы: Framer, Wix ADI, 10Web</span>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">📊</span>
+                        <div>
+                            <strong style="color: var(--text-main); display: block; margin-bottom: 4px;">Автоматизация</strong>
+                            <span class="feature-text">Zapier, Make, n8n — автоматизация рутинных задач</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Слайд 5: Афиша -->
+        <div class="slide">
+            <div class="center-content">
+                <h2 class="animate-left delay-1" style="align-self: flex-start; width: 50%;">🎨 Визуальная концепция: Афиша</h2>
+                <div class="visual-wrapper animate-scale delay-2">
+                    <!-- ВСТАВЬТЕ ССЫЛКУ НА ВАШУ АФИШУ В src -->
+                    <img src="афиша.jpg" alt="Афиша AI-воркшопа">
+                </div>
+                <div class="info-block animate-in delay-3" style="max-width: 450px; text-align: center;">
+                    <p style="font-size: 0.95rem; line-height: 1.5;">
+                        <span class="highlight">Ключевые элементы:</span> Тёмный фон с неоновыми акцентами, крупный заголовок с эффектом свечения, 
+                        дата/локация в тегах, QR-код на регистрацию, футуристичная графика. 
+                        Формат вертикальный для удобной публикации в соцсетях и печати.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Слайд 6: Лендинг -->
+        <div class="slide">
+            <div class="center-content">
+                <h2 class="animate-left delay-1" style="align-self: flex-start; width: 50%;">💻 Визуальная концепция: Лендинг</h2>
+                <div class="visual-wrapper animate-scale delay-2">
+                    <!-- ВСТАВЬТЕ ССЫЛКУ НА ВАШ ЛЕНДИНГ/СКРИНШОТ В src -->
+                    <img src="для_презентации.jpg" alt="Лендинг AI-воркшопа">
+                </div>
+                <div class="info-block animate-in delay-3" style="max-width: 450px; text-align: center;">
+                    <p style="font-size: 0.95rem; line-height: 1.5;">
+                        <span class="highlight">Функционал:</span> Адаптивная вёрстка (mobile-first), карточки спикеров с hover-эффектом, 
+                        тайминг программы, кнопка регистрации, форма обратной связи. 
+                        Единый стиль с афишей: цвета <span class="mono">#0f172a</span>, <span class="mono">#3b82f6</span>, <span class="mono">#38bdf8</span>.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Слайд 7: Дорожная карта -->
+        <div class="slide">
+            <h2 class="animate-left delay-1"> Дорожная карта подготовки</h2>
+            <div class="grid-2-col">
+                <div class="animate-left delay-2">
+                    <div class="timeline-item"><span class="mono">Неделя 1</span> Финализация программы, подтверждение спикеров, бронирование аудитории</div>
+                    <div class="timeline-item"><span class="mono">Неделя 2</span> Дизайн афиши + запуск лендинга, старт регистрации, анонс в соцсетях</div>
+                    <div class="timeline-item"><span class="mono">Неделя 3</span> Промо-кампания: рассылка по группам, посты VK/Telegram, партнёры</div>
+                </div>
+                <div class="animate-left delay-3">
+                    <div class="timeline-item"><span class="mono">Неделя 4</span> Логистика: оборудование, кофе-брейк, печать материалов, волонтёры</div>
+                    <div class="timeline-item"><span class="mono">Неделя 5</span> Репетиция, финальные напоминания участникам, подготовка сертификатов</div>
+                    <div class="timeline-item"><span class="mono">12 мая</span> <span class="highlight">ПРОВЕДЕНИЕ воркшопа</span></div>
+                </div>
+            </div>
+            
+            <div class="card animate-in delay-4" style="margin-top: 16px;">
+                <h3 style="color: var(--accent-glow); margin-bottom: 12px;">📈 Контрольные точки и метрики:</h3>
+                <div class="grid-2-col">
+                    <div class="info-block">
+                        <h4 style="color: var(--text-main); margin-bottom: 8px;">Регистрации:</h4>
+                        <ul style="font-size: 0.9rem;">
+                            <li><span class="mono">50+</span> регистраций → запуск таргетированной рекламы</li>
+                            <li><span class="mono">70+</span> регистраций → закрытие регистрации</li>
+                            <li>Конверсия сайта: <span class="mono">15-20%</span></li>
+                        </ul>
+                    </div>
+                    <div class="info-block">
+                        <h4 style="color: var(--text-main); margin-bottom: 8px;">Участники:</h4>
+                        <ul style="font-size: 0.9rem;">
+                            <li><span class="mono">30+</span> заявок от преподавателей → расширение аудитории</li>
+                            <li>Явка: <span class="mono">85%+</span> от зарегистрированных</li>
+                            <li>Удовлетворённость: <span class="mono">90%+</span> (по опросу)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stat-box animate-in delay-5" style="margin-top: 14px; background: rgba(16,185,129,0.08); border-color: var(--success);">
+                <strong style="color: var(--success); font-size: 1rem;">🎯 Цель:</strong>
+                <span style="color: var(--text-muted); font-size: 0.95rem; margin-left: 8px;">
+                    Провести качественный воркшоп для 50-70 участников с оценкой удовлетворённости 90%+ 
+                    и получить 3+ публикации в СМИ
+                </span>
+            </div>
+        </div>
+
+        <!-- Слайд 8: Команда -->
+        <div class="slide">
+            <h2 class="animate-left delay-1">👥 Команда проекта</h2>
+            <div class="grid-3">
+                <div class="card animate-in delay-2">
+                    <h3 style="color: var(--accent-glow);">🔹 Дарья Городова</h3>
+                    <p style="color: var(--accent-glow); font-size: 0.9rem; margin-bottom: 10px; font-weight: 600;">Организатор проекта</p>
+                    <ul style="font-size: 0.9rem;">
+                        <li>Общая координация проекта</li>
+                        <li>Коммуникация с администрацией</li>
+                        <li>Управление бюджетом</li>
+                        <li>Взаимодействие со спонсорами</li>
+                    </ul>
+                </div>
+                <div class="card animate-in delay-3">
+                    <h3 style="color: var(--accent-glow);">🔹 Татьяна Шкуратова и Алина Тихонова<br><span style="font-size: 0.85rem;"></span></h3>
+                    <p style="color: var(--accent-glow); font-size: 0.9rem; margin-bottom: 10px; font-weight: 600;">Контент-лиды</p>
+                    <ul style="font-size: 0.9rem;">
+                        <li>Разработка программы воркшопа</li>
+                        <li>Подготовка методических материалов</li>
+                        <li>Создание презентаций и гайдов</li>
+                        <li>Разработка практических заданий</li>
+                    </ul>
+                </div>
+                <div class="card animate-in delay-4">
+                    <h3 style="color: var(--accent-glow);">🔹 Руслан Ющук</h3>
+                    <p style="color: var(--accent-glow); font-size: 0.9rem; margin-bottom: 10px; font-weight: 600;">Технический специалист</p>
+                    <ul style="font-size: 0.9rem;">
+                        <li>Разработка и поддержка лендинга</li>
+                        <li>Настройка системы регистрации</li>
+                        <li>Техническое обеспечение мероприятия</li>
+                        <li>Онлайн-трансляция (при необходимости)</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="grid-2-col" style="margin-top: 16px;">
+                <div class="card animate-in delay-5" style="border-style: dashed;">
+                    <h3 style="font-size: 1.1rem; color: var(--text-main); margin-bottom: 10px;">🤝 Партнёры</h3>
+                    <ul style="font-size: 0.95rem;">
+                        <li>Кафедра цифровых технологий техникума</li>
+                        <li>Студенческий совет (волонтёры)</li>
+                        <li>Потенциальный спонсор: «Зелёная Долина»</li>
+                    </ul>
+                </div>
+                <div class="card animate-in delay-6" style="border-color: var(--success);">
+                    <h3 style="font-size: 1.1rem; color: var(--success); margin-bottom: 10px;">🎁 Что получат участники</h3>
+                    <ul style="font-size: 0.95rem;">
+                        <li>Сертификат о прохождении воркшопа</li>
+                        <li>Пакет материалов (гайды, шаблоны, промпты)</li>
+                        <li>Доступ к закрытому Telegram-каналу</li>
+                        <li>Портфолио из 5+ выполненных проектов</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="progress-bar" id="progressBar"></div>
+    <div class="controls">
+        <button class="ctrl-btn" id="prevBtn" aria-label="Предыдущий слайд">◀</button>
+        <span class="slide-counter" id="slideCounter">1 / 7</span>
+        <button class="ctrl-btn" id="nextBtn" aria-label="Следующий слайд">▶</button>
+    </div>
+
+    <script>
+        const slides = document.querySelectorAll('.slide');
+        const counter = document.getElementById('slideCounter');
+        const progressBar = document.getElementById('progressBar');
+        let current = 0;
+
+        function updateSlide() {
+            slides.forEach((slide, i) => {
+                slide.classList.remove('active', 'prev', 'next');
+                if (i === current) slide.classList.add('active');
+                else if (i < current) slide.classList.add('prev');
+                else slide.classList.add('next');
+            });
+            counter.textContent = `${current + 1} / ${slides.length}`;
+            progressBar.style.width = `${((current + 1) / slides.length) * 100}%`;
+        }
+
+        function next() {
+            if (current < slides.length - 1) {
+                current++;
+                updateSlide();
+            }
+        }
+
+        function prev() {
+            if (current > 0) {
+                current--;
+                updateSlide();
+            }
+        }
+
+        document.getElementById('nextBtn').addEventListener('click', next);
+        document.getElementById('prevBtn').addEventListener('click', prev);
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+                e.preventDefault();
+                next();
+            }
+            if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+                e.preventDefault();
+                prev();
+            }
+        });
+
+        let touchStartX = 0;
+        document.addEventListener('touchstart', e => {
+            touchStartX = e.touches[0].clientX;
+        }, { passive: true });
+
+        document.addEventListener('touchend', e => {
+            const diff = touchStartX - e.changedTouches[0].clientX;
+            if (Math.abs(diff) > 50) {
+                if (diff > 0) next();
+                else prev();
+            }
+        }, { passive: true });
+
+        updateSlide();
+    </script>
+</body>
+</html>
